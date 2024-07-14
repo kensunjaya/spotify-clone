@@ -3,9 +3,11 @@ import axios from 'axios';
 import { FaPlayCircle, FaPauseCircle } from 'react-icons/fa';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { Progress } from "flowbite-react";
+import { ScaleLoader } from 'react-spinners';
 // import './App.css'
 
 interface Track {
+  id: string;
   name: string;
   artists: any;
   album: any;
@@ -14,7 +16,7 @@ interface Track {
 
 const App = () => {
   const [audio, setAudio] = useState<any | null>(new Audio());
-  const [track, setTrack] = useState<Track | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [paused, setPaused] = useState<boolean>(true);
   const [tracks, setTracks] = useState<any | null>([]);
   const [spotifyApi, setSpotifyApi] = useState<SpotifyWebApi | null>(null);
@@ -152,9 +154,10 @@ const App = () => {
       <div className="text-grays bg-primary rounded-lg mx-3 mb-20">
         {tracks.map((track: any, index: number) => {
           return (
-            <div key={track.id} className="flex items-center p-3 rounded-xl hover:bg-third" onClick={async () => {
+            <div key={track.id} className={`flex items-center p-3 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
               getAudioData(track.name + " by " + track.artists[0].name);
-              setTrack({
+              setCurrentTrack({
+                id: track.id,
                 name: track.name,
                 artists: track.artists[0].name,
                 album: track.album,
@@ -168,18 +171,23 @@ const App = () => {
                 <p className="text-white">{track.name}</p>
                 <p className="text-grays">{track.artists[0].name}</p>
               </div>
+              <div className="flex flex-grow justify-end text-sm">
+                {currentTrack?.id === track.id ? 
+                <ScaleLoader color='#A7A7A7' loading={true} height={20} width={4} speedMultiplier={0.75} margin={1.5}/> : 
+                <p className="text-grays">{formatTime(track.duration_ms / 1000)}</p>}
+              </div>
             </div>
           )
         })}
       </div>
     </div>
     <footer className="text-white h-fit w-full bg-background flex font-sans mt-auto p-3 fixed bottom-0" onKeyDown={handleKeyDown}>
-      {track && (
+      {currentTrack && (
         <div className="flex items-center flex-grow text-sm w-auto absolute">
-          <img src={track.thumbnail} alt={track.name} className="w-16 h-16 rounded-lg" />
+          <img src={currentTrack.thumbnail} alt={currentTrack.name} className="w-16 h-16 rounded-lg" />
           <div className="ml-3">
-            <p className="text-white">{track.name}</p>
-            <p className="text-grays">{track.artists}</p>
+            <p className="text-white">{currentTrack.name}</p>
+            <p className="text-grays">{currentTrack.artists}</p>
           </div>
         </div>
       )}

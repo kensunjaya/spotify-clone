@@ -3,6 +3,7 @@ import cors from 'cors';
 import youtubeDl from 'youtube-dl-exec';
 import play from 'play-dl';
 import axios from 'axios';
+import querystring from 'querystring';
 
 const app = express();
 
@@ -45,11 +46,11 @@ app.get('/download', async (req, res) => {
 
 app.get('/accesstoken', async (req, res) => {
   const tokenUrl = 'https://accounts.spotify.com/api/token';
-    const data = new URLSearchParams({
+    const data = querystring.stringify({
       grant_type: 'client_credentials',
       client_id: req.query.id,
       client_secret: req.query.secret
-    }).toString();
+    });
   
     try {
       const response = await axios.post(tokenUrl, data, {
