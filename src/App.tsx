@@ -105,6 +105,12 @@ const App = () => {
     }
   };
 
+  const handleSeek = (pos: number) => {
+    if (audio.duration > 0) {
+      audio.fastSeek(audio.duration * pos);
+    }
+  }
+
   const formatTime = (seconds: number): string => {
     if (!seconds) {
       return '00:00';
@@ -186,7 +192,10 @@ const App = () => {
         </div>
         <div className="justify-center flex items-center">
           <div className="text-sm mx-3 text-grays">{formatTime(audio.currentTime)}</div>
-          <div className="w-[30%] bg-gray-200 rounded-full h-1 dark:bg-gray-700 items-center">
+          <div className="w-[30%] bg-gray-200 rounded-full h-1 dark:bg-gray-700 items-center" onClick={(event) => {
+            const x = (event.clientX - ((screen.width - event.currentTarget.offsetWidth) / 2)) / event.currentTarget.offsetWidth;
+            handleSeek(x);
+          }}>
             <div className="bg-white h-1 rounded-full dark:bg-white" style={{width: `${audioPosition}%`}}></div>
           </div>
           <div className="text-sm mx-3 text-grays">{formatTime(audio.duration)}</div>
