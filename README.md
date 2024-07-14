@@ -1,30 +1,29 @@
-# React + TypeScript + Vite
+# Spotify Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Currently in a very early development stage
 
-Currently, two official plugins are available:
+Prerequisites:
+- [Node.js v20](https://nodejs.org/en/download/) or higher.
+- [Spotify developer account](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+Running the website locally:
+1. Clone this repository
 ```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+git clone https://github.com/kensunjaya/spotify-clone.git
+cd spotify-clone
+```
+3. Install all required depedencies
+```
+npm install
+```
+4. [Create an app](https://developer.spotify.com/dashboard/create) on spotify developer account if you haven't done already<br/>
+If you're confused about Redirect URI, set it to https://example.org/callback<br/><br/>
+5. Create a following .env file within the project folder:
+```env
+VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
+VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_id
+```
+6. Run the website with the following command:
+```
+npm run dev
+```
