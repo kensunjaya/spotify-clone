@@ -25,5 +25,6 @@ VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_id
 ```
 5. Run the website with the following command:
 ```
+node extractor/extractor.mjs
 npm run dev
 ```
