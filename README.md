@@ -18,7 +18,7 @@ npm install
 ```
 3. [Create an app](https://developer.spotify.com/dashboard/create) on spotify developer account if you haven't done already<br/>
 If you're confused about Redirect URI, set it to https://example.org/callback<br/><br/>
-4. Create a following .env file within the project folder:
+4. Create a following .env file within the project root folder:
 ```env
 VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
 VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_id
