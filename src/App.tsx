@@ -19,6 +19,9 @@ const App = () => {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [paused, setPaused] = useState<boolean>(true);
   const [tracks, setTracks] = useState<any | null>([]);
+  const [selectedTab, setSelectedTab] = useState<string>('songs');
+  const [query, setQuery] = useState<string>('');
+  const [playlists, setPlaylists] = useState<any | null>([]);
   const [spotifyApi, setSpotifyApi] = useState<SpotifyWebApi | null>(null);
   const [audioPosition, setAudioPosition] = useState<number>(0);
 
@@ -57,6 +60,16 @@ const App = () => {
     .then(function(data) {
       setTracks(data.body.tracks?.items);
       console.log(data.body.tracks);
+      setQuery(query);
+    }, function(err) {
+      console.error(err);
+    });
+  }
+  const findPlaylist = async (query: string) => {
+    spotifyApi?.searchPlaylists(query)
+    .then(function(data) {
+      setPlaylists(data.body.playlists?.items);
+      console.log(data.body.playlists);
     }, function(err) {
       console.error(err);
     });
@@ -122,6 +135,10 @@ const App = () => {
     return `${minutes < 10 ? '0' : ''}${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const formatString = (str: string, length: number): string => {
+    return str.length > length ? str.substring(0, length) + '...' : str;
+  }
+
   useEffect(() => {
     if (!paused) {
       audio.play();
@@ -148,37 +165,92 @@ const App = () => {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"></link>
-    <div className="mb-auto">
+    <div className="mb-auto flex flex-col">
       <input type="text" placeholder='What do you want to play?' className="bg-third p-3 rounded-full text-sm pr-10 mb-5 w-fit text-white focus:outline-none focus:ring-white focus:ring-2 m-3" onKeyDown={handleKeyDown} />
+      {query.length > 0 && (
+      <div className="flex flex-row">
+        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'all' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+          onClick={() => {
+            findPlaylist(query);
+            setSelectedTab('all');
+          }}>
+            All
+        </button>
+        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'songs' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+          onClick={() => {
+            findTracks(query);
+            setSelectedTab('songs');
+          }}>
+            Songs
+        </button>
+        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'playlists' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+          onClick={() => {
+            findPlaylist(query);
+            setSelectedTab('playlists');
+          }}>
+            Playlists
+        </button>
+      </div>
+      )}
 
       <div className="text-grays bg-primary rounded-lg mx-3 mb-20">
-        {tracks.map((track: any, index: number) => {
-          return (
-            <div key={track.id} className={`flex items-center p-3 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
-              getAudioData(track.name + " by " + track.artists[0].name);
-              setCurrentTrack({
-                id: track.id,
-                name: track.name,
-                artists: track.artists[0].name,
-                album: track.album,
-                thumbnail: track.album.images[0].url,
-              });
+        {selectedTab === 'songs' && (
+          tracks.map((track: any, index: number) => {
+            return (
+              <div key={track.id} className={`flex items-center p-3 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
+                getAudioData(track.name + " by " + track.artists[0].name);
+                setCurrentTrack({
+                  id: track.id,
+                  name: track.name,
+                  artists: track.artists[0].name,
+                  album: track.album,
+                  thumbnail: track.album.images[0].url,
+                });
 
-            }}>
-              <div className="font-semibold w-5 mr-3">{index + 1}</div>
-              <img src={track.album.images[0].url} alt={track.name} className="w-14 h-14 rounded-lg" />
-              <div className="ml-3 text-sm">
-                <p className="text-white">{track.name}</p>
-                <p className="text-grays">{track.artists[0].name}</p>
+              }}>
+                <div className="font-semibold w-5 mr-3">{index + 1}</div>
+                <img src={track.album.images[0].url} alt={track.name} className="w-14 h-14 rounded-lg" />
+                <div className="ml-3 text-sm">
+                  <p className="text-white">{track.name}</p>
+                  <p className="text-grays">{track.artists[0].name}</p>
+                </div>
+                <div className="flex flex-grow justify-end text-sm">
+                  {currentTrack?.id === track.id ? 
+                  <ScaleLoader color='#A7A7A7' loading={true} height={20} width={4} speedMultiplier={0.75} margin={1.5}/> : 
+                  <p className="text-grays">{formatTime(track.duration_ms / 1000)}</p>}
+                </div>
               </div>
-              <div className="flex flex-grow justify-end text-sm">
-                {currentTrack?.id === track.id ? 
-                <ScaleLoader color='#A7A7A7' loading={true} height={20} width={4} speedMultiplier={0.75} margin={1.5}/> : 
-                <p className="text-grays">{formatTime(track.duration_ms / 1000)}</p>}
+            )
+          })
+        )}
+        {selectedTab === 'playlists' && (<div className="flex flex-wrap items-center p-3 rounded-xl">{
+          playlists.map((playlist: any) => {
+            return (
+              <div key={playlist.id} className={`flex flex-col p-3 rounded-xl hover:bg-third ${currentTrack?.id === playlist.id && "bg-secondary"}`} onClick={async () => {
+                // getAudioData(playlist.name);
+                // setCurrentTrack({
+                //   id: playlist.id,
+                //   name: playlist.name,
+                //   artists: playlist.owner.display_name,
+                //   album: playlist.images[0],
+                //   thumbnail: playlist.images[0].url,
+                // });
+
+              }}> 
+                <img src={playlist.images[0].url} alt={playlist.name} className="w-40 h-40 rounded-lg mb-3" />
+                <div className="text-sm">
+                  <p className="text-white">{formatString(playlist.name, 18)}</p>
+                  <p className="text-grays">By {formatString(playlist.owner.display_name, 12)}</p>
+                </div>
+                <div className="flex flex-grow text-sm">
+                  {currentTrack?.id === playlist.id ? 
+                  <ScaleLoader color='#A7A7A7' loading={true} height={20} width={4} speedMultiplier={0.75} margin={1.5}/> : 
+                  <p className="text-grays">{playlist.tracks.total} songs</p>}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })
+        }</div>)}
       </div>
     </div>
     <footer className="text-white h-fit w-full bg-background flex font-sans mt-auto p-3 fixed bottom-0" onKeyDown={handleKeyDown}>
