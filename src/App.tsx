@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios';
-import { FaPlayCircle, FaPauseCircle } from 'react-icons/fa';
+import { FaPlayCircle, FaPauseCircle, FaArrowCircleLeft, FaArrowCircleRight } from 'react-icons/fa';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { Progress } from "flowbite-react";
 import { ScaleLoader } from 'react-spinners';
+import LeftSideBar from './components/LeftSideBar';
 // import './App.css'
 
 interface Track {
@@ -79,7 +80,12 @@ const App = () => {
   const handleKeyDown = async (event: any) => {
     if (event.key === "Enter" && !event.shiftKey && event.target.value.length > 0) {
       event.preventDefault();
-      await findTracks(event.target.value);
+      if (selectedTab === 'songs') {
+        await findTracks(event.target.value);
+      }
+      else if (selectedTab === 'playlists') {
+        await findPlaylist(event.target.value);
+      }
     }
   };
 
@@ -144,7 +150,7 @@ const App = () => {
       audio.play();
       const interval = setInterval(() => {
         setAudioPosition((audio.currentTime / audio.duration) * 100);
-      }, 1000);
+      }, 100);
 
       audio.addEventListener('ended', () => {
         setPaused(true);
@@ -165,25 +171,32 @@ const App = () => {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"></link>
-    <div className="mb-auto flex flex-col">
-      <input type="text" placeholder='What do you want to play?' className="bg-third p-3 rounded-full text-sm pr-10 mb-5 w-fit text-white focus:outline-none focus:ring-white focus:ring-2 m-3" onKeyDown={handleKeyDown} />
+    <LeftSideBar />
+    <div className="ml-[35vh] my-2">
+    <div className="mb-auto flex flex-col mx-4 bg-primary rounded-lg">
+      <div className="flex flex-col ml-4">
+      <div className="flex flex-row items-center mb-5">
+        <FaArrowCircleLeft size={30} color='black' lightingColor='black' className="hover:cursor-pointer mr-1.5" />
+        <FaArrowCircleRight size={30} color='black' className="hover:cursor-pointer" />
+        <input type="text" placeholder='What do you want to play?' className="bg-third p-3 rounded-full text-sm pr-20 w-fit text-white focus:outline-none focus:ring-white focus:ring-2 m-2 ml-4" onKeyDown={handleKeyDown} />
+      </div>
       {query.length > 0 && (
       <div className="flex flex-row">
-        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'all' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+        <button className={`bg-third rounded-full py-2 px-3 text-sm w-fit ml-4 mb-3 ${selectedTab === 'all' ? 'bg-white text-black' : 'hover:bg-gray-800 text-white'}`}
           onClick={() => {
             findPlaylist(query);
             setSelectedTab('all');
           }}>
             All
         </button>
-        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'songs' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+        <button className={`bg-third rounded-full py-2 px-3 text-sm w-fit ml-3 mb-3 ${selectedTab === 'songs' ? 'bg-white text-black' : 'hover:bg-gray-800 text-white'}`}
           onClick={() => {
             findTracks(query);
             setSelectedTab('songs');
           }}>
             Songs
         </button>
-        <button className={`bg-third rounded-full py-2 px-3 text-white text-sm w-fit ml-3 mb-3 ${selectedTab === 'playlists' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
+        <button className={`bg-third rounded-full py-2 px-3 text-sm w-fit ml-3 mb-3 ${selectedTab === 'playlists' ? 'bg-white text-black' : 'hover:bg-gray-800 text-white'}`}
           onClick={() => {
             findPlaylist(query);
             setSelectedTab('playlists');
@@ -193,11 +206,11 @@ const App = () => {
       </div>
       )}
 
-      <div className="text-grays bg-primary rounded-lg mx-3 mb-20">
+      <div className="text-grays bg-primary rounded-lg mx-3 ml-4 mb-20">
         {selectedTab === 'songs' && (
           tracks.map((track: any, index: number) => {
             return (
-              <div key={track.id} className={`flex items-center p-3 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
+              <div key={track.id} className={`flex items-center px-3 py-2 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
                 getAudioData(track.name + " by " + track.artists[0].name);
                 setCurrentTrack({
                   id: track.id,
@@ -209,7 +222,7 @@ const App = () => {
 
               }}>
                 <div className="font-semibold w-5 mr-3">{index + 1}</div>
-                <img src={track.album.images[0].url} alt={track.name} className="w-14 h-14 rounded-lg" />
+                <img src={track.album.images[0].url} alt={track.name} className="w-12 h-12 rounded-lg" />
                 <div className="ml-3 text-sm">
                   <p className="text-white">{track.name}</p>
                   <p className="text-grays">{track.artists[0].name}</p>
@@ -226,7 +239,7 @@ const App = () => {
         {selectedTab === 'playlists' && (<div className="flex flex-wrap items-center p-3 rounded-xl">{
           playlists.map((playlist: any) => {
             return (
-              <div key={playlist.id} className={`flex flex-col p-3 rounded-xl hover:bg-third ${currentTrack?.id === playlist.id && "bg-secondary"}`} onClick={async () => {
+              <div key={playlist.id} className={`flex flex-col p-3 rounded-xl hover:bg-third hover:cursor-pointer ${currentTrack?.id === playlist.id && "bg-secondary"}`} onClick={async () => {
                 // getAudioData(playlist.name);
                 // setCurrentTrack({
                 //   id: playlist.id,
@@ -252,6 +265,8 @@ const App = () => {
           })
         }</div>)}
       </div>
+      </div>
+      </div>
     </div>
     <footer className="text-white h-fit w-full bg-background flex font-sans mt-auto p-3 fixed bottom-0" onKeyDown={handleKeyDown}>
       {currentTrack && (
@@ -270,17 +285,20 @@ const App = () => {
           <FaPauseCircle size={40} color='#FFFFFF' className="hover:cursor-pointer" onClick={handlePlayPause} />
         }
         </div>
+
+        {/* Progress Bar */}
         <div className="justify-center flex items-center">
-          <div className="text-sm mx-3 text-grays">{formatTime(audio.currentTime)}</div>
-          <div className="w-[30%] bg-gray-200 rounded-full h-1 dark:bg-gray-700 items-center" onClick={(event) => {
+          <div className="text-sm mx-3 text-grays w-[3vh]">{formatTime(audio.currentTime)}</div>
+          <div className="w-[25%] bg-gray-200 rounded-full h-1 dark:bg-gray-700 items-center" onClick={(event) => {
             const x = (event.clientX - ((screen.width - event.currentTarget.offsetWidth) / 2)) / event.currentTarget.offsetWidth;
             handleSeek(x);
           }}>
             <div className="bg-white h-1 rounded-full dark:bg-white" style={{width: `${audioPosition}%`}}></div>
           </div>
-          <div className="text-sm mx-3 text-grays">{formatTime(audio.duration)}</div>
+          <div className="text-sm mx-3 text-grays w-[3vh]">{formatTime(audio.duration)}</div>
         </div>
       </div>
+      
     </footer>
     </main>
     </>
