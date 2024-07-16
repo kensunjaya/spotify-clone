@@ -13,6 +13,7 @@ export default {
         'third': '#242424',
         'greens': '#1ED760',
         'grays': '#A7A7A7',
+        'lightgrays': '#4D4D4D',
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios';
 import { FaPlayCircle, FaPauseCircle, FaArrowCircleLeft, FaArrowCircleRight } from 'react-icons/fa';
+import { IoPlayCircleSharp, IoPauseCircleSharp, IoPlaySkipForwardSharp, IoPlaySkipBackSharp } from "react-icons/io5";
 import SpotifyWebApi from 'spotify-web-api-node';
-import { Progress } from "flowbite-react";
+import { LuClock3 } from "react-icons/lu";
+import { IoIosArrowDropleftCircle, IoIosArrowDroprightCircle } from "react-icons/io";
+
 import { ScaleLoader } from 'react-spinners';
 import LeftSideBar from './components/LeftSideBar';
 // import './App.css'
@@ -174,10 +177,14 @@ const App = () => {
     <LeftSideBar />
     <div className="ml-[35vh] my-2">
     <div className="mb-auto flex flex-col mx-4 bg-primary rounded-lg">
-      <div className="flex flex-col ml-4">
-      <div className="flex flex-row items-center mb-5">
-        <FaArrowCircleLeft size={30} color='black' lightingColor='black' className="hover:cursor-pointer mr-1.5" />
-        <FaArrowCircleRight size={30} color='black' className="hover:cursor-pointer" />
+      <div className="flex flex-col">
+      <div className="flex flex-row items-center mb-2 ml-5">
+        <div className="rounded-full border-black box-border bg-grays w-6 h-6 mr-4 flex justify-center items-center hover:cursor-pointer">
+          <IoIosArrowDropleftCircle size={40} color='black' lightingColor='black' className="absolute rounded-full" />
+        </div>
+        <div className="rounded-full border-black box-border bg-grays w-6 h-6 mr-1.5 flex justify-center items-center hover:cursor-pointer">
+          <IoIosArrowDroprightCircle size={40} color='black' className="absolute rounded-full" />
+        </div>
         <input type="text" placeholder='What do you want to play?' className="bg-third p-3 rounded-full text-sm pr-20 w-fit text-white focus:outline-none focus:ring-white focus:ring-2 m-2 ml-4" onKeyDown={handleKeyDown} />
       </div>
       {query.length > 0 && (
@@ -205,12 +212,16 @@ const App = () => {
         </button>
       </div>
       )}
-
-      <div className="text-grays bg-primary rounded-lg mx-3 ml-4 mb-20">
+      <div className="flex w-full bg-secondary border-third border-b-2 text-grays text-sm py-2 px-8 pr-16 whitespace-nowrap items-center">
+        <div className="mr-[32rem]">{"# Title"}</div>
+        <div className="mr-[32rem]">{"Album"}</div>
+        <div className="w-full flex justify-end"><LuClock3 size={18} color='#A7A7A7'/></div>
+      </div>
+      <div className="text-grays bg-primary rounded-lg mx-3 my-2 ml-4 mb-20">
         {selectedTab === 'songs' && (
           tracks.map((track: any, index: number) => {
             return (
-              <div key={track.id} className={`flex items-center px-3 py-2 rounded-xl hover:bg-third ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
+              <div key={track.id} className={`flex items-center px-5 py-2 rounded-xl hover:bg-third hover:text-white ${currentTrack?.id === track.id && "bg-secondary"}`} onClick={async () => {
                 getAudioData(track.name + " by " + track.artists[0].name);
                 setCurrentTrack({
                   id: track.id,
@@ -221,13 +232,16 @@ const App = () => {
                 });
 
               }}>
-                <div className="font-semibold w-5 mr-3">{index + 1}</div>
+                <div className="font-semibold w-5 mr-3 hover:cursor-default">{index + 1}</div>
                 <img src={track.album.images[0].url} alt={track.name} className="w-12 h-12 rounded-lg" />
-                <div className="ml-3 text-sm">
-                  <p className="text-white">{track.name}</p>
-                  <p className="text-grays">{track.artists[0].name}</p>
+                <div className="ml-3 text-sm w-[28rem]">
+                  <p className="text-white whitespace-nowrap hover:cursor-default">{formatString(track.name, 50)}</p>
+                  <a className="text-grays hover:underline" href={track.artists[0].external_urls?.spotify}>{track.artists[0].name}</a>
                 </div>
-                <div className="flex flex-grow justify-end text-sm">
+                <div className="pl-3 text-grays text-sm">
+                  <a href={track.album.external_urls?.spotify} className="hover:underline">{track.album.name}</a>
+                </div>
+                <div className="flex flex-grow justify-end text-sm mr-[1.5rem]">
                   {currentTrack?.id === track.id ? 
                   <ScaleLoader color='#A7A7A7' loading={true} height={20} width={4} speedMultiplier={0.75} margin={1.5}/> : 
                   <p className="text-grays">{formatTime(track.duration_ms / 1000)}</p>}
@@ -280,22 +294,24 @@ const App = () => {
       )}
       <div className="flex flex-col w-full">
         <div className="w-full items-center justify-center flex mb-1">
+        <IoPlaySkipBackSharp size={20} color='#FFFFFF' className=" mr-4 hover:cursor-pointer"/>
         {paused ?
-          <FaPlayCircle size={40} color='#FFFFFF' className="hover:cursor-pointer" onClick={handlePlayPause} /> :
-          <FaPauseCircle size={40} color='#FFFFFF' className="hover:cursor-pointer" onClick={handlePlayPause} />
+          <IoPlayCircleSharp size={40} color='#FFFFFF' className="hover:cursor-pointer" onClick={handlePlayPause} /> :
+          <IoPauseCircleSharp size={40} color='#FFFFFF' className="hover:cursor-pointer" onClick={handlePlayPause} />
         }
+        <IoPlaySkipForwardSharp size={20} color='#FFFFFF' className=" ml-4 hover:cursor-pointer"/>
         </div>
 
         {/* Progress Bar */}
         <div className="justify-center flex items-center">
-          <div className="text-sm mx-3 text-grays w-[3vh]">{formatTime(audio.currentTime)}</div>
-          <div className="w-[25%] bg-gray-200 rounded-full h-1 dark:bg-gray-700 items-center" onClick={(event) => {
+          <div className="text-xs mr-3 text-grays w-[3rem] text-center">{formatTime(audio.currentTime)}</div>
+          <div className="w-[60vh] bg-gray-200 rounded-full h-1 dark:bg-lightgrays items-center" onClick={(event) => {
             const x = (event.clientX - ((screen.width - event.currentTarget.offsetWidth) / 2)) / event.currentTarget.offsetWidth;
             handleSeek(x);
           }}>
             <div className="bg-white h-1 rounded-full dark:bg-white" style={{width: `${audioPosition}%`}}></div>
           </div>
-          <div className="text-sm mx-3 text-grays w-[3vh]">{formatTime(audio.duration)}</div>
+          <div className="text-xs ml-3 text-grays w-[3rem] text-center">{formatTime(audio.duration)}</div>
         </div>
       </div>
       
